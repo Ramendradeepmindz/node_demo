@@ -241,50 +241,50 @@ class AdminController {
       var { _id } = req.user._id;
       const { authorization } = req.headers;
       var token = authorization;
-      // AdminDetails.findByIdAndUpdate({ _id: _id }, { $pull: { token: token } }, { new: true }).exec(function(err, userResult) {
-      //     if (err) {
-      //         return Helper.response(res, 422, "Something went wrong.")
-      //     } else {
-      //         return Helper.response(res, 200, "Logout successfully.")
 
-      //     }
-      // });
-
-      const data = await AdminDetails.findByIdAndUpdate(
-        req.user._id,
-        { token: "" },
-        function (err, docs) {
-          if (err) {
-            conslole.log(err);
-          } else {
-            console.log(docs);
-          }
-        }
-      );
+      await AdminDetails.updateOne({ _id: _id }, { token: "", status: false });
+      return res.status(404).json({
+        StatusCode: 404,
+        Status: "Success",
+        Message: UtilText.LogoutSuccess,
+      });
     } catch (error) {
       return Helper.response(res, 500, "Server error.");
     }
-    //   try {
-    //     const { id } = req.user;
+  };
 
-    //     await AdminDetails.updateOne(
-    //       { _id: id },
-    //       { token: "" }
-    //     );
-    //     return res.status(404).json({
-    //       StatusCode: 404,
-    //       Status: "Success",
-    //       Message: UtilText.LogoutSuccess,
-    //     });
+  static getProfile = async (req, res) => {
+    try {
+      const {id} = req.user._id;
+  
+        const adminUser = await AdminDetails.findById({ _id: req.user._id });
 
-    //   } catch (error) {
-    //     return res.status(404).json({
-    //       StatusCode: 404,
-    //       Status: "Failed"+error,
-    //       Message: UtilText.UserNotFound,
-    //     });
-    //   }
-    // };
+        if (adminUser != null) {
+         
+          //   adminUser.password = undefined;
+          adminUser.password=undefined
+     
+          res.status(200).json({
+            StatusCode: 200,
+            Status: "Success",
+            Message: UtilText.registerSuccess,
+            UserData:adminUser
+          });
+        } else {
+          return res.status(404).json({
+            StatusCode: 404,
+            Status: "Failed",
+            Message: UtilText.UserNotFound,
+          });
+        }
+      
+    } catch (error) {
+      return res.status(400).json({
+        StatusCode: 400,
+        Status: "Error",
+        Message: error,
+      });
+    }
   };
 }
 

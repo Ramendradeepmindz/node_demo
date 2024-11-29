@@ -10,5 +10,6 @@ routes.post("/adminLogin", AdminController.adminLogin);
 routes.post("/resetPassword", AdminController.resetPassword);
 routes.post("/forgotPassword", AdminController.forgotPassword);
 routes.get("/logout", adminMidi.adminToken, AdminController.logout);
+routes.get("/getProfile", adminMidi.adminToken, AdminController.getProfile);
 
 export default routes;

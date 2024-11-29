@@ -19,17 +19,17 @@ class AuthMiddlewares {
             }
             const { _id } = payload.userId
             adminModel.findById(payload.userId).lean().then(userdata => {
-                if (userdata === null) {
-                    return Helper.response(res, 401, "Token is invalid if");
+                if (userdata == null ||userdata.token=="") {
+                    return Helper.response(res, 401, "Token is invalid");
                 }
                 //if(token == userdata.JWT_Token){
-                if (userdata.token.includes(token)) {
+                else if (userdata.token.includes(token)) {
                     userdata.token = token;
                     req.user = userdata
          
                     next()
                 } else {
-                    return Helper.response(res, 401, "Token is invalid else");
+                    return Helper.response(res, 401, "Token is invalid ");
                 }
             })
 
