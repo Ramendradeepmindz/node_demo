@@ -3,9 +3,12 @@ import bcrypt from "bcrypt";
 import validation from "../../Validation/validator.js";
 import jwt from "jsonwebtoken";
 import UtilText from "../../Helper/messageHelper.js";
-
+import express from "express";
 import mongoose from "mongoose";
 
+import multer from "multer";
+import { v2 as cloudinary } from "cloudinary";
+const upload = multer({ dest: "uploads/" });
 class AdminController {
   static adminRegistration = async (req, res) => {
     const { name, email, password, phoneNo } = req.body;
@@ -239,8 +242,6 @@ class AdminController {
   static logout = async (req, res) => {
     try {
       var { _id } = req.user._id;
-      const { authorization } = req.headers;
-      var token = authorization;
 
       await AdminDetails.updateOne({ _id: _id }, { token: "", status: false });
       return res.status(404).json({
@@ -262,17 +263,19 @@ class AdminController {
       if (adminUser != null) {
         //   adminUser.password = undefined;
         adminUser.password = undefined;
+       
 
         res.status(200).json({
           StatusCode: 200,
           Status: "Success",
-          Message: UtilText.registerSuccess,
+          Message: UtilText.Details,
           UserData: adminUser,
         });
       } else {
         return res.status(404).json({
           StatusCode: 404,
           Status: "Failed",
+          
           Message: UtilText.UserNotFound,
         });
       }
@@ -283,6 +286,41 @@ class AdminController {
         Message: error,
       });
     }
+  };
+
+  static uploadImage = async (req, res) => {
+    cloudinary.config({
+      cloud_name: "dd0sva6po",
+      api_key: "592728797625274",
+      api_secret: "iL1wP3DZxvNFvR1ptq4AKFSP6G8", // Click 'View API Keys' above to copy your API secret
+    });
+
+    const filePath = req.file.path;
+    const data = await cloudinary.uploader.upload(filePath, {
+      folder: "Assets",
+    });
+
+    // .then(result => {
+
+    if (data.type === "upload") {
+      await AdminDetails.updateOne(
+        { _id: req.user._id },
+        { profileImg: data.secure_url }
+      );
+      return res.status(404).json({
+        StatusCode: 404,
+        Status: "Success",
+        Message: "Upload successful",
+      });
+
+      // res.json({ message: "Upload successful", url: data.secure_url });
+    } else {
+      res.json({ message: "Image Upload  Failed", url: data });
+    }
+    // })
+    // .catch(error => {
+    //   res.status(500).json({ message: 'Upload failed', error: error });
+    // });
   };
 }
 

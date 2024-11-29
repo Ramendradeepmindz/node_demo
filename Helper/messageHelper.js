@@ -7,6 +7,8 @@ const   UtilText={
      UserNotFound:"User not found, please register",
      ResetPasswordSuccess:"Reset Password successful! You're ready to go.",
      LogoutSuccess:"Logout successful! Please login now.",
+     Details:"Your details have been displayed successfully.",
+     DetailsNotFound:"Details not found.",
 
 }
 export default UtilText
