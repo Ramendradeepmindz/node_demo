@@ -255,29 +255,27 @@ class AdminController {
 
   static getProfile = async (req, res) => {
     try {
-      const {id} = req.user._id;
-  
-        const adminUser = await AdminDetails.findById({ _id: req.user._id });
+      const { id } = req.user._id;
 
-        if (adminUser != null) {
-         
-          //   adminUser.password = undefined;
-          adminUser.password=undefined
-     
-          res.status(200).json({
-            StatusCode: 200,
-            Status: "Success",
-            Message: UtilText.registerSuccess,
-            UserData:adminUser
-          });
-        } else {
-          return res.status(404).json({
-            StatusCode: 404,
-            Status: "Failed",
-            Message: UtilText.UserNotFound,
-          });
-        }
-      
+      const adminUser = await AdminDetails.findById({ _id: req.user._id });
+
+      if (adminUser != null) {
+        //   adminUser.password = undefined;
+        adminUser.password = undefined;
+
+        res.status(200).json({
+          StatusCode: 200,
+          Status: "Success",
+          Message: UtilText.registerSuccess,
+          UserData: adminUser,
+        });
+      } else {
+        return res.status(404).json({
+          StatusCode: 404,
+          Status: "Failed",
+          Message: UtilText.UserNotFound,
+        });
+      }
     } catch (error) {
       return res.status(400).json({
         StatusCode: 400,
@@ -318,6 +316,6 @@ export default AdminController;
 15) Category List
 16) Hide Category
 17)
-
+//
 
 */
