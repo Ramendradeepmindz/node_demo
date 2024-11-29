@@ -6,7 +6,7 @@ const   UtilText={
      InvalidEmailPassword:"Invalid email or password. Make sure your email is formatted correctly and your password meets the required criteria.",
      UserNotFound:"User not found, please register",
      ResetPasswordSuccess:"Reset Password successful! You're ready to go.",
-     LogoutSuccess:"Logout successful! You're ready to go.",
+     LogoutSuccess:"Logout successful! Please login now.",
 
 }
 export default UtilText

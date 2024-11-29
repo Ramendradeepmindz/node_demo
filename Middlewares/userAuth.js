@@ -1,45 +1,41 @@
 import adminModel from "../Models/Admin/AdminDetails.js";
 import jwt from "jsonwebtoken";
 import Helper from "../Helper/helper_response.js";
-
+const JWT_SECRET = process.env.JSON_WEC_KEY
 class AuthMiddlewares {
   static adminToken = async (req, res, next) => {
-    try {
-      const { authorization } = req.headers;
 
-      if (!authorization) {
-        return Helper.response(res, 401, "You must be logged in");
-      }
+    const { authorization } = req.headers
+            // console.log(authorization)
+        if (!authorization) {
+            return Helper.response(res, 401, "you must be logged in"+authorization);
+        }
+        const token = authorization
+        jwt.verify(token, process.env.JSON_WEC_KEY, (err, payload) => {
+            // console.log(payload)
+            // return false;
+            if (err) {
+                return Helper.response(res, 401, "you must be logged in"+process.env.JSON_WEC_KEY);
+            }
+            const { _id } = payload.userId
+            adminModel.findById(payload.userId).lean().then(userdata => {
+                if (userdata === null) {
+                    return Helper.response(res, 401, "Token is invalid if");
+                }
+                //if(token == userdata.JWT_Token){
+                if (userdata.token.includes(token)) {
+                    userdata.token = token;
+                    req.user = userdata
+         
+                    next()
+                } else {
+                    return Helper.response(res, 401, "Token is invalid else");
+                }
+            })
 
-      const token = authorization;
+        })
 
-      const payload = jwt.verify(token, process.env.JSON_WEC_KEY);
-
-      if (!payload || !payload.userId) {
-        return Helper.response(res, 401, "Token is invalid");
-      }
-
-      const userdata = await adminModel.findById(payload.userId).lean();
-
-      if (!userdata) {
-        return Helper.response(res, 401, "Token is invalid");
-      }
-
-     else if (!userdata.token || userdata.token.includes(token)) {
-        return Helper.response(res, 401, "Token is invalid");
-      }
-
-      req.user = userdata;
-
-      next();
-    } catch (err) {
-      if (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError") {
-        return Helper.response(res, 401, "Token is invalid or expired");
-      }
-
-      console.error("Auth Middleware Error:", err);
-      return Helper.response(res, 500, "Internal Server Error");
-    }
+    
   };
 }
 

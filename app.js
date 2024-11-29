@@ -16,6 +16,6 @@ app.use('/api/v1/admin', routes)
 
 app.listen((port), () => {
 
-   console.log("App is Running " + DATABASE_URL)
+   console.log("App is Running ")
 })
 

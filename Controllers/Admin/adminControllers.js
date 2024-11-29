@@ -4,7 +4,7 @@ import validation from "../../Validation/validator.js";
 import jwt from "jsonwebtoken";
 import UtilText from "../../Helper/messageHelper.js";
 
-
+import mongoose from "mongoose";
 
 class AdminController {
   static adminRegistration = async (req, res) => {
@@ -91,17 +91,21 @@ class AdminController {
               { expiresIn: "20d" }
             );
 
-            const adminUserUpdate = await AdminDetails.updateOne(
+            await AdminDetails.updateOne(
               { _id: adminUser._id },
               { token: token, status: true }
             );
-            adminUser.password = undefined;
+            const adminUserData = await AdminDetails.findById({
+              _id: adminUser._id,
+            });
+
+            adminUserData.password = undefined;
 
             res.status(200).json({
               StatusCode: 200,
               Status: "Success",
               Message: UtilText.LoginSuccess,
-              data: adminUser,
+              data: adminUserData,
             });
           } else {
             res.status(203).json({
@@ -234,28 +238,53 @@ class AdminController {
 
   static logout = async (req, res) => {
     try {
-      const { id } = req.user;
+      var { _id } = req.user._id;
+      const { authorization } = req.headers;
+      var token = authorization;
+      // AdminDetails.findByIdAndUpdate({ _id: _id }, { $pull: { token: token } }, { new: true }).exec(function(err, userResult) {
+      //     if (err) {
+      //         return Helper.response(res, 422, "Something went wrong.")
+      //     } else {
+      //         return Helper.response(res, 200, "Logout successfully.")
 
+      //     }
+      // });
 
-
-      await AdminDetails.updateOne(
-        { _id: id },
-        { token: "" }
+      const data = await AdminDetails.findByIdAndUpdate(
+        req.user._id,
+        { token: "" },
+        function (err, docs) {
+          if (err) {
+            conslole.log(err);
+          } else {
+            console.log(docs);
+          }
+        }
       );
-      return res.status(404).json({
-        StatusCode: 404,
-        Status: "Success",
-        Message: UtilText.LogoutSuccess,
-      });
-
-      
     } catch (error) {
-      return res.status(404).json({
-        StatusCode: 404,
-        Status: "Failed"+error,
-        Message: UtilText.UserNotFound,
-      });
+      return Helper.response(res, 500, "Server error.");
     }
+    //   try {
+    //     const { id } = req.user;
+
+    //     await AdminDetails.updateOne(
+    //       { _id: id },
+    //       { token: "" }
+    //     );
+    //     return res.status(404).json({
+    //       StatusCode: 404,
+    //       Status: "Success",
+    //       Message: UtilText.LogoutSuccess,
+    //     });
+
+    //   } catch (error) {
+    //     return res.status(404).json({
+    //       StatusCode: 404,
+    //       Status: "Failed"+error,
+    //       Message: UtilText.UserNotFound,
+    //     });
+    //   }
+    // };
   };
 }
 
@@ -269,3 +298,26 @@ export default AdminController;
 // 205	RESET_CONTENT	Reset Content
 // 206	PARTIAL_CONTENT	Partial Content
 // 207	MULTI_STATUS	Multi-Status
+
+/* 
+
+01) RegisterAdmin
+02) Login
+03) Reset Password
+04) Forgot Password, 
+05) Edit Profile ,
+06) Upload Profile Image,
+07) Get  Profile Data
+08) Logout
+09) Add Partner
+10) Edit Partner
+11) Partner List
+12) Disable  Partner
+13) Add Category
+14) Edit Category
+15) Category List
+16) Hide Category
+17)
+
+
+*/
