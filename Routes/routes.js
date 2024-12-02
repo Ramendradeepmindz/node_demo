@@ -21,6 +21,7 @@ routes.post("/forgotPassword", AdminController.forgotPassword);
 routes.get("/logout", adminMidi.adminToken, AdminController.logout);
 routes.get("/getProfile", adminMidi.adminToken, AdminController.getProfile);
 routes.post("/uploadImage",adminMidi.adminToken, upload.single('file'), AdminController.uploadImage)
+routes.post("/editProfile",adminMidi.adminToken, AdminController.editProfile)
 //'/upload', upload.single('image'), (req, res)
 
 export default routes;

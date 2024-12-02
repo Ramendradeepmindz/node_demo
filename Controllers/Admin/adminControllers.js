@@ -263,7 +263,6 @@ class AdminController {
       if (adminUser != null) {
         //   adminUser.password = undefined;
         adminUser.password = undefined;
-       
 
         res.status(200).json({
           StatusCode: 200,
@@ -275,9 +274,69 @@ class AdminController {
         return res.status(404).json({
           StatusCode: 404,
           Status: "Failed",
-          
+
           Message: UtilText.UserNotFound,
         });
+      }
+    } catch (error) {
+      return res.status(400).json({
+        StatusCode: 400,
+        Status: "Error",
+        Message: error,
+      });
+    }
+  };
+  static editProfile = async (req, res) => {
+    try {
+      const { id } = req.user._id;
+      const { name, emailID, phoneNo } = req.body;
+
+      const Message = {
+        name: validation.validateName(name),
+        email: validation.validateEmail(emailID),
+
+        phoneNo: validation.validatePhoneNo(phoneNo),
+      };
+
+      // Filter out null values (no Message)
+      const filteredMessage = Object.fromEntries(
+        Object.entries(Message).filter(([_, value]) => value !== null)
+      );
+
+      if (Object.keys(filteredMessage).length > 0) {
+        return res.status(400).json({
+          StatusCode: 400,
+          Status: "Error",
+          Message: filteredMessage,
+        });
+      } else {
+        const adminUser = await AdminDetails.findByIdAndUpdate(
+          { _id: req.user._id },
+
+          {
+            name: name,
+            email: emailID,
+            phoneNo: phoneNo,
+          }
+        );
+
+        if (adminUser != null) {
+
+
+          return res.status(404).json({
+            StatusCode: 404,
+            Status: "Success",
+
+            Message: "User Details update success"
+          });
+        } else {
+          return res.status(404).json({
+            StatusCode: 404,
+            Status: "Failed",
+
+            Message: UtilText.UserNotFound,
+          });
+        }
       }
     } catch (error) {
       return res.status(400).json({
@@ -307,8 +366,8 @@ class AdminController {
         { _id: req.user._id },
         { profileImg: data.secure_url }
       );
-      return res.status(404).json({
-        StatusCode: 404,
+      return res.status(200).json({
+        StatusCode: 200,
         Status: "Success",
         Message: "Upload successful",
       });
@@ -345,7 +404,7 @@ export default AdminController;
 06) Upload Profile Image,
 07) Get  Profile Data
 08) Logout
-09) Add Partner
+09) Add Partner (Name, Email ID,Phone NO, Aadhar Card,GST NO.,Address )
 10) Edit Partner
 11) Partner List
 12) Disable  Partner

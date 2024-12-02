@@ -14,6 +14,10 @@ app.use(express.json())
 
 app.use('/api/v1/admin', routes)
 
+app.get('/', (req, res) => {
+   res.send('Welcome Server is working fine');
+});
+
 app.listen((port), () => {
 
    console.log("App is Running ")

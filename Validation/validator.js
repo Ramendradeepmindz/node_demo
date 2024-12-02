@@ -23,7 +23,7 @@ const validationAll  = {
     },
 
     validatePhoneNo(phoneNo) {
-        if (!phoneNo || !validator.isMobilePhone(phoneNo, 'any')) {
+        if (phoneNo.length!=10 ||  !phoneNo || !validator.isMobilePhone(phoneNo, 'any')) {
             return "Invalid phone number.";
         }
         return null;

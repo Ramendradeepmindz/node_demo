@@ -8,14 +8,14 @@ class AuthMiddlewares {
     const { authorization } = req.headers
             // console.log(authorization)
         if (!authorization) {
-            return Helper.response(res, 401, "you must be logged in"+authorization);
+            return Helper.response(res, 401, "you must be logged in");
         }
         const token = authorization
         jwt.verify(token, process.env.JSON_WEC_KEY, (err, payload) => {
             // console.log(payload)
             // return false;
             if (err) {
-                return Helper.response(res, 401, "you must be logged in"+process.env.JSON_WEC_KEY);
+                return Helper.response(res, 401, "you must be logged in");
             }
             const { _id } = payload.userId
             adminModel.findById(payload.userId).lean().then(userdata => {
