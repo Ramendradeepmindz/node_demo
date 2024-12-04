@@ -9,6 +9,9 @@ const   UtilText={
      LogoutSuccess:"Logout successful! Please login now.",
      Details:"Your details have been displayed successfully.",
      DetailsNotFound:"Details not found.",
+     TokenNotFound:"Token not found. Please provide a valid token",
+     UserAddedSuccess:"User added successfully",
+     PartnerStatusChange:"Partner status changed successfully.",
 
 }
 export default UtilText

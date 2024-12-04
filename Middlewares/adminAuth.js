@@ -1,6 +1,7 @@
 import adminModel from "../Models/Admin/AdminDetails.js";
 import jwt from "jsonwebtoken";
-import Helper from "../Helper/helper_response.js";
+import ResponseHelper from "../Helper/helper_response.js";
+import UtilText from "../Helper/messageHelper.js";
 const JWT_SECRET = process.env.JSON_WEC_KEY
 class AuthMiddlewares {
   static adminToken = async (req, res, next) => {
@@ -8,19 +9,20 @@ class AuthMiddlewares {
     const { authorization } = req.headers
             // console.log(authorization)
         if (!authorization) {
-            return Helper.response(res, 401, "you must be logged in");
+            return ResponseHelper.error(res, 401, UtilText.TokenNotFound);
         }
         const token = authorization
         jwt.verify(token, process.env.JSON_WEC_KEY, (err, payload) => {
             // console.log(payload)
             // return false;
             if (err) {
-                return Helper.response(res, 401, "you must be logged in");
+                // return Helper.response(res, 401, "you must be logged in");
+                return ResponseHelper.error(res, 401, "you must be logged in");
             }
             const { _id } = payload.userId
             adminModel.findById(payload.userId).lean().then(userdata => {
                 if (userdata == null ||userdata.token=="") {
-                    return Helper.response(res, 401, "Token is invalid");
+                    return ResponseHelper.error(res, 401, "Token is invalid");
                 }
                 //if(token == userdata.JWT_Token){
                 else if (userdata.token.includes(token)) {
@@ -29,7 +31,7 @@ class AuthMiddlewares {
          
                     next()
                 } else {
-                    return Helper.response(res, 401, "Token is invalid ");
+                    return ResponseHelper.error(res, 401, "Token is invalid");
                 }
             })
 

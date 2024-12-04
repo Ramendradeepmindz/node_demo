@@ -1,13 +1,14 @@
 import AdminDetails from "../../Models/Admin/AdminDetails.js";
+import PartnerDetails from "../../Models/Admin/PartnerDetails.js";
 import bcrypt from "bcrypt";
 import validation from "../../Validation/validator.js";
 import jwt from "jsonwebtoken";
 import UtilText from "../../Helper/messageHelper.js";
-import express from "express";
-import mongoose from "mongoose";
+import ResponseHelper from "../../Helper/helper_response.js";
 
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
+
 const upload = multer({ dest: "uploads/" });
 class AdminController {
   static adminRegistration = async (req, res) => {
@@ -321,13 +322,11 @@ class AdminController {
         );
 
         if (adminUser != null) {
-
-
           return res.status(404).json({
             StatusCode: 404,
             Status: "Success",
 
-            Message: "User Details update success"
+            Message: "User Details update success",
           });
         } else {
           return res.status(404).json({
@@ -380,6 +379,76 @@ class AdminController {
     // .catch(error => {
     //   res.status(500).json({ message: 'Upload failed', error: error });
     // });
+  };
+
+  static addPartner = async (req, res) => {
+    const { EmailID, GSTNo, adharaCard, panCard } = req.body;
+    const existingPartner = await PartnerDetails.findOne({
+      $or: [{ EmailID }, { GSTNo }, { adharaCard }, { panCard }],
+    });
+
+    if (existingPartner) {
+      let errorMessage = "";
+
+      if (existingPartner.EmailID === EmailID) {
+        errorMessage = "Email is already registered.";
+      } else if (existingPartner.GSTNo === GSTNo) {
+        errorMessage = "GST Number is already registered.";
+      } else if (existingPartner.adharaCard === adharaCard) {
+        errorMessage = "Aadhaar Card number is already registered.";
+      } else if (existingPartner.panCard === panCard) {
+        errorMessage = "PAN Card number is already registered.";
+      }
+
+      return ResponseHelper.error(res, 209, errorMessage);
+    } else {
+      try {
+        const partnerData = new PartnerDetails(req.body);
+
+        const addedData = await partnerData.save();
+        return ResponseHelper.success(
+          res,
+          200,
+          UtilText.UserAddedSuccess,
+          addedData
+        );
+      } catch (error) {
+        return ResponseHelper.error(res, 400, UtilText.UnableRegister);
+      }
+    }
+  };
+  static getAllPartner = async (req, res) => {
+    try {
+      const partner = await PartnerDetails.find();
+
+      if (partner != null) {
+        //   adminUser.password = undefined;
+
+        return ResponseHelper.success(res, 200, UtilText.Details, partner);
+      } else {
+        return ResponseHelper.error(res, 209, UtilText.DetailsNotFound);
+      }
+    } catch (error) {
+      return ResponseHelper.error(res, 404, UtilText.DetailsNotFound);
+    }
+  };
+  static partnerStatusChange = async (req, res) => {
+    const { status, partnerID } = req.body;
+
+    try {
+      const partnerExist = await PartnerDetails.findById({ _id: partnerID });
+      if (!partnerExist) {
+        return ResponseHelper.error(res, 209, UtilText.DetailsNotFound);
+      } else {
+        await PartnerDetails.findByIdAndUpdate(
+          { _id: partnerID },
+          { shopOpenStatus: status }
+        );
+        return ResponseHelper.success(res, 200, UtilText.PartnerStatusChange);
+      }
+    } catch (error) {
+      return ResponseHelper.error(res, 209, error);
+    }
   };
 }
 
