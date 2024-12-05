@@ -1,5 +1,7 @@
 import AdminDetails from "../../Models/Admin/AdminDetails.js";
 import PartnerDetails from "../../Models/Admin/PartnerDetails.js";
+import Category from "../../Models/Admin/Category.js";
+
 import bcrypt from "bcrypt";
 import validation from "../../Validation/validator.js";
 import jwt from "jsonwebtoken";
@@ -358,8 +360,6 @@ class AdminController {
       folder: "Assets",
     });
 
-    // .then(result => {
-
     if (data.type === "upload") {
       await AdminDetails.updateOne(
         { _id: req.user._id },
@@ -370,15 +370,9 @@ class AdminController {
         Status: "Success",
         Message: "Upload successful",
       });
-
-      // res.json({ message: "Upload successful", url: data.secure_url });
     } else {
       res.json({ message: "Image Upload  Failed", url: data });
     }
-    // })
-    // .catch(error => {
-    //   res.status(500).json({ message: 'Upload failed', error: error });
-    // });
   };
 
   static addPartner = async (req, res) => {
@@ -433,21 +427,166 @@ class AdminController {
     }
   };
   static partnerStatusChange = async (req, res) => {
-    const { status, partnerID } = req.body;
+    const { status, id } = req.body;
 
     try {
-      const partnerExist = await PartnerDetails.findById({ _id: partnerID });
+      const partnerExist = await PartnerDetails.findById({ _id: id });
       if (!partnerExist) {
         return ResponseHelper.error(res, 209, UtilText.DetailsNotFound);
       } else {
         await PartnerDetails.findByIdAndUpdate(
-          { _id: partnerID },
+          { _id: id },
           { shopOpenStatus: status }
         );
         return ResponseHelper.success(res, 200, UtilText.PartnerStatusChange);
       }
     } catch (error) {
       return ResponseHelper.error(res, 209, error);
+    }
+  };
+
+  static addCategory = async (req, res) => {
+    const filePath = req.file.path;
+    const Cat_Name = req.body.Cat_Name;
+
+    const existingCategory = await Category.findOne({
+      $or: [{ Cat_Name }],
+    });
+
+    if (existingCategory) {
+      let errorMessage = "";
+
+      if (existingCategory.Cat_Name === Cat_Name) {
+        errorMessage = "Category is already registered.";
+      }
+      return ResponseHelper.error(res, 209, errorMessage);
+    } else {
+      try {
+        cloudinary.config({
+          cloud_name: "dd0sva6po",
+          api_key: "592728797625274",
+          api_secret: "iL1wP3DZxvNFvR1ptq4AKFSP6G8", // Click 'View API Keys' above to copy your API secret
+        });
+
+        const data = await cloudinary.uploader.upload(filePath, {
+          folder: "CategoryImage",
+        });
+
+        // .then(result => {
+
+        if (data.type === "upload") {
+          const categoryData = new Category({
+            Cat_Name: Cat_Name,
+            Cat_Image: data.secure_url,
+          });
+
+          const addedData = await categoryData.save();
+          return ResponseHelper.success(
+            res,
+            200,
+            UtilText.CategoryAddedSuccess,
+            addedData
+          );
+        }
+      } catch (error) {
+        return ResponseHelper.error(res, 400, UtilText.UnableRegister);
+      }
+    }
+  };
+  static categoryListData = async (req, res) => {
+    try {
+      const categoryData = await Category.find();
+
+      if (categoryData != null) {
+        //   adminUser.password = undefined;
+
+        return ResponseHelper.success(res, 200, UtilText.Details, categoryData);
+      } else {
+        return ResponseHelper.error(res, 209, UtilText.DetailsNotFound);
+      }
+    } catch (error) {
+      return ResponseHelper.error(res, 404, UtilText.DetailsNotFound);
+    }
+  };
+
+  static updateCategoryByName = async (req, res) => {
+    try {
+      const { Cat_Name, id } = req.body;
+
+      if (Cat_Name != "" && id != "") {
+        const categoryData = await Category.findByIdAndUpdate(
+          id,
+          { Cat_Name: Cat_Name },
+          { new: true }
+        );
+
+        if (categoryData != null) {
+          return ResponseHelper.success(
+            res,
+            200,
+            "Category Update successfully"
+          );
+        } else {
+          return ResponseHelper.error(res, 209, UtilText.DetailsNotFound);
+        }
+      } else {
+        return ResponseHelper.error(
+          res,
+          209,
+          "Category name and ID is required!"
+        );
+      }
+    } catch (error) {
+      return ResponseHelper.error(res, 404, UtilText.DetailsNotFound);
+    }
+  };
+
+  static categoryStatusChange = async (req, res) => {
+    const { status, id } = req.body;
+
+    try {
+      const categoryData = await Category.findByIdAndUpdate(
+        id,
+        { Cat_Status: status },
+        { new: true }
+      );
+      if (!categoryData) {
+        return ResponseHelper.error(res, 209, UtilText.DetailsNotFound);
+      } else {
+        return ResponseHelper.success(res, 200, UtilText.CategoryStatusChange);
+      }
+    } catch (error) {
+      return ResponseHelper.error(res, 209, error);
+    }
+  };
+  static updateCategoryImage = async (req, res) => {
+    const filePath = req.file.path;
+    const Cat_ID = req.body.Cat_ID;
+
+    try {
+      cloudinary.config({
+        cloud_name: "dd0sva6po",
+        api_key: "592728797625274",
+        api_secret: "iL1wP3DZxvNFvR1ptq4AKFSP6G8", // Click 'View API Keys' above to copy your API secret
+      });
+
+      const data = await cloudinary.uploader.upload(filePath, {
+        folder: "CategoryImage",
+      });
+
+  
+
+      if (data.type === "upload") {
+        const categoryData = await Category.findByIdAndUpdate(
+          Cat_ID.trim(),
+          { Cat_Image: data.secure_url },
+          { new: true }
+        );
+
+        return ResponseHelper.success(res, 200, UtilText.CategoryStatusChange);
+      }
+    } catch (error) {
+      return ResponseHelper.error(res, 400, UtilText.UnableRegister);
     }
   };
 }
@@ -483,5 +622,43 @@ export default AdminController;
 16) Hide Category
 17)
 //
+
+
+
+*****************Add Category************************
+Cat_Name,
+Cat_Image,
+Cat_Status,
+Cat_Date,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 */

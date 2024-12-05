@@ -12,6 +12,8 @@ const   UtilText={
      TokenNotFound:"Token not found. Please provide a valid token",
      UserAddedSuccess:"User added successfully",
      PartnerStatusChange:"Partner status changed successfully.",
+     CategoryStatusChange:"Category status changed successfully.",
+     CategoryAddedSuccess:"Category added successfully",
 
 }
 export default UtilText

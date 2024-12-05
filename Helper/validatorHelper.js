@@ -70,7 +70,7 @@ class ValidatorHelper {
       .withMessage("Status must be a boolean value (true or false)."),
 
       // Validate 'partnerID'
-      body("partnerID")
+      body("id")
         .notEmpty()
         .withMessage("Partner ID is required")
        // Use isUUID or a proper validation for your partnerID format
@@ -89,7 +89,34 @@ class ValidatorHelper {
         next();
       },
     ];
-  }
+  } 
+  
+  static categoryValidation() {
+    return [
+      // Validate Cat_Name
+      body("Cat_Name")
+        .notEmpty()
+        .withMessage("Cat Name is required")
+        .isString()
+        .withMessage("Cat Name must be a string"),
+    
+      // Validate Cat_Image
+   
+    
+      // Middleware to handle validation errors
+      (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+          return res.status(400).json({
+            StatusCode: 400,
+            Status: "Bad Request",
+            Message: "Validation failed",
+            Errors: errors.array(),
+          });
+        }
+        next();
+      }
+    ]}
 }
 
 export default ValidatorHelper;
